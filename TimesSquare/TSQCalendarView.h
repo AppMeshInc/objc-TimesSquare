@@ -11,13 +11,17 @@
 
 
 @protocol TSQCalendarViewDelegate;
-
+@protocol TSQCalendarViewScrollDelegate;
+@class TSQCalendarMonthHeaderCell;
 
 /** The `TSQCalendarView` class displays a monthly calendar in a self-contained scrolling view. It supports any calendar that `NSCalendar` supports.
  
  The implementation and usage are very similar to `UITableView`: the app provides reusable cells via a data source and controls behavior via a delegate. See `TSQCalendarCell` for a cell superclass.
  */
 @interface TSQCalendarView : UIView
+
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) TSQCalendarMonthHeaderCell *headerView; // nil unless pinsHeaderToTop == YES
 
 /** @name Date Setup */
 
@@ -60,6 +64,8 @@
  */
 @property (nonatomic, weak) id<TSQCalendarViewDelegate> delegate;
 
+@property (nonatomic, weak) id<TSQCalendarViewScrollDelegate> scrollDelegate;
+
 /** Whether to pin the header to the top of the view.
  
  If you're trying to emulate the built-in calendar app, set this to `YES`. Default value is `NO`.
@@ -98,6 +104,12 @@
  */
 @property (nonatomic, strong) Class rowCellClass;
 
+- (void)scrollToDate:(NSDate *)date animated:(BOOL)animated;
+
+- (NSInteger)sectionForDate:(NSDate *)date;
+
+- (NSDate *)firstOfMonthForSection:(NSInteger)section;
+
 @end
 
 /** The methods in the `TSQCalendarViewDelegate` protocol allow the adopting delegate to either prevent a day from being selected or respond to it.
@@ -124,5 +136,17 @@
  @param date Midnight on the date being selected.
  */
 - (void)calendarView:(TSQCalendarView *)calendarView didSelectDate:(NSDate *)date;
+
+@end
+
+@protocol TSQCalendarViewScrollDelegate <NSObject>
+
+@optional
+
+- (void)calendarViewDidFinishScrolling:(TSQCalendarView *)calendarView;
+
+- (void)calendarView:(TSQCalendarView *)calendarView willEndDraggingWithTargetPoint:(CGPoint)targetPoint;
+
+- (void)calendarView:(TSQCalendarView *)calendarView willBeginDeceleratingAtOffset:(CGPoint)offset;
 
 @end
